@@ -1,0 +1,31 @@
+name: Sync to Upstream
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+    
+  workflow_dispatch:  # click the button on Github repo!
+
+jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
+    name: Sync HEAD with upstream latest
+
+    steps:
+    - name: Checkout HEAD
+      uses: actions/checkout@v2
+      with:
+        ref: master
+    
+    - name: Upstream Sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      id: sync
+      with:
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_repo: zalando/spilo
+        upstream_sync_branch: master
+        target_sync_branch: master
+
+    - name: Fetch All Tags from Upstream
+      run: |
+        git fetch upstream --tags

@@ -599,8 +599,10 @@ def get_placeholders(provider):
     placeholders.setdefault('LOG_BUCKET_SCOPE_SUFFIX', '')
 
     # only accept true as value or else it will be empty = disabled
-    if placeholders['LOG_SHIP_HOURLY']:
-        placeholders['LOG_SHIP_HOURLY'] = os.environ.get('LOG_SHIP_HOURLY', '') in ['true', 'TRUE']
+    if placeholders.get('LOG_SHIP_HOURLY', '').lower() == 'true':
+        placeholders['LOG_SHIP_HOURLY'] = 'true'
+    else:
+        placeholders['LOG_SHIP_HOURLY'] = ''
 
     # see comment for wal-e bucket prefix
     placeholders.setdefault('LOG_BUCKET_SCOPE_PREFIX', '{0}-'.format(placeholders['NAMESPACE'])
@@ -786,6 +788,9 @@ def write_log_environment(placeholders):
 
     if not os.path.exists(log_env['LOG_ENV_DIR']):
         os.makedirs(log_env['LOG_ENV_DIR'])
+
+    tags = json.loads(os.getenv('LOG_S3_TAGS'))
+    log_env['LOG_S3_TAGS'] = "&".join(f"{key}={os.getenv(value)}" for key, value in tags.items())
 
     for var in ('LOG_TMPDIR',
                 'LOG_SHIP_HOURLY',

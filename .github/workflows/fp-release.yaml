@@ -35,6 +35,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Derive spilo image name
+        id: image
+        working-directory: postgres-appliance
+        run: |
+          PGVERSION=$(sed -n 's/^ARG PGVERSION=\([0-9][0-9]*\).*$/\1/p' Dockerfile)
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$PGVERSION:${TAG_NAME}"
+          echo "NAME=$IMAGE" >> "$GITHUB_OUTPUT"
+          
       - name: Build and push (linux/amd64)
         uses: docker/build-push-action@v6
         with:

@@ -259,8 +259,20 @@ if [ "$DEMO" != "true" ]; then
             if [ "$v1" = "$v2" ]; then
                 started=1
             elif [ $started = 1 ]; then
-                for d1 in extension contrib contrib/postgis-$POSTGIS_VERSION; do
-                    cd "$v1/$d1"
+                # Resolve actual PostGIS contrib dir: postgis-$POSTGIS_VERSION, postgis-${POSTGIS_VERSION%.*}, or postgis-3
+                POSTGIS_DIR_CANDIDATE="contrib/postgis-$POSTGIS_VERSION"
+                if [ ! -d "$v1/$POSTGIS_DIR_CANDIDATE" ]; then
+                    if [ -d "$v1/contrib/postgis-${POSTGIS_VERSION%.*}" ]; then
+                        POSTGIS_DIR_CANDIDATE="contrib/postgis-${POSTGIS_VERSION%.*}"
+                    elif [ -d "$v1/contrib/postgis-3" ]; then
+                        POSTGIS_DIR_CANDIDATE="contrib/postgis-3"
+                    else
+                        POSTGIS_DIR_CANDIDATE=""
+                    fi
+                fi
+
+                for d1 in extension contrib ${POSTGIS_DIR_CANDIDATE:+$POSTGIS_DIR_CANDIDATE}; do
+                    cd "$v1/$d1" || continue
                     d2="$d1"
                     d1="../../${v1##*/}/$d1"
                     if [ "${d2%-*}" = "contrib/postgis" ]; then

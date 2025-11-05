@@ -7,22 +7,30 @@ on:
 
 jobs:
   build_and_push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Build and push with tag name
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Extract Tag Name
         id: extract_tag
         run: |
           echo "TAG_NAME=$(echo ${{ github.ref }} | cut -d'/' -f3)" >> $GITHUB_ENV
 
+      - name: Set up packages
+        run: sudo apt-get install -y docker-compose
+  
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Build image with tag name
         run: |
           docker build -t ghcr.io/fpm-git/spilo:${{ env.TAG_NAME }} postgres-appliance/
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

@@ -43,7 +43,8 @@ COPY build_scripts/base.sh /builddeps/
 COPY --from=dependencies-builder /builddeps/*.deb /builddeps/
 
 ARG PGVERSION
-ARG TIMESCALEDB_APACHE_ONLY=true
+ARG TIMESCALEDB
+ARG TIMESCALEDB_APACHE_ONLY=false
 ARG TIMESCALEDB_TOOLKIT=true
 ARG COMPRESS
 ARG PGOLDVERSIONS="14 15 16 17"
